@@ -20,14 +20,13 @@ export const TeacherDashboardModal: React.FC<TeacherDashboardModalProps> = ({
 
   const handleExportCSV = () => {
     if (sessions.length === 0) return;
-    const headers = ['Naam', 'Klas', 'Datum', 'Quiz Score', 'Quiz Voltooid', 'Makeover Score', 'Diploma'];
+    const headers = ['Naam', 'Klas', 'Datum', 'Quiz Score', 'Quiz Voltooid', 'Klaar'];
     const rows = sessions.map((s) => [
       `"${s.studentName}"`,
       `"${s.studentClass}"`,
       `"${new Date(s.createdAt).toLocaleDateString('nl-BE')}"`,
       `${s.quizScore}/8`,
       s.quizCompleted ? 'Ja' : 'Nee',
-      `${s.makeoverProject?.score || 0}%`,
       s.diplomaIssued ? 'Ja' : 'Nee',
     ]);
 
@@ -120,8 +119,7 @@ export const TeacherDashboardModal: React.FC<TeacherDashboardModalProps> = ({
                     <th className="py-2.5 px-3">Klas</th>
                     <th className="py-2.5 px-3">Voortgang</th>
                     <th className="py-2.5 px-3">Quiz Score</th>
-                    <th className="py-2.5 px-3">Makeover</th>
-                    <th className="py-2.5 px-3">Diploma</th>
+                    <th className="py-2.5 px-3">Status</th>
                     <th className="py-2.5 px-3 text-right">Actie</th>
                   </tr>
                 </thead>
@@ -138,7 +136,7 @@ export const TeacherDashboardModal: React.FC<TeacherDashboardModalProps> = ({
                       </td>
                       <td className="py-3 px-3">
                         <span className="font-semibold text-slate-700">
-                          {s.completedModules.length} / 6 modules
+                          {s.completedModules.length} / 5 modules
                         </span>
                       </td>
                       <td className="py-3 px-3">
@@ -153,14 +151,9 @@ export const TeacherDashboardModal: React.FC<TeacherDashboardModalProps> = ({
                         </span>
                       </td>
                       <td className="py-3 px-3">
-                        <span className="font-semibold text-slate-700">
-                          {s.makeoverProject?.score || 0}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
                         {s.diplomaIssued ? (
                           <span className="text-emerald-600 font-bold flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Behaald
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Voltooid
                           </span>
                         ) : (
                           <span className="text-slate-400">Bezig</span>

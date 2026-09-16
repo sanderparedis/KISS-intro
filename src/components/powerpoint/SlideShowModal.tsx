@@ -12,7 +12,7 @@ interface SlideShowModalProps {
   children: React.ReactNode;
 }
 
-const MODULE_ORDER = ['intro', 'kiss', 'spot', 'makeover', 'quiz', 'diploma'];
+const MODULE_ORDER = ['intro', 'kiss', 'spot', 'quiz', 'diploma'];
 
 export const SlideShowModal: React.FC<SlideShowModalProps> = ({
   isOpen,

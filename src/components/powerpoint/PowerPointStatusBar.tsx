@@ -19,8 +19,8 @@ interface PowerPointStatusBarProps {
   session: StudentSession | null;
   accessibility: AccessibilitySettings;
   onChangeAccessibility: (newSettings: Partial<AccessibilitySettings>) => void;
-  showSpeakerNotes: boolean;
-  setShowSpeakerNotes: (show: boolean) => void;
+  showSpeakerNotes?: boolean;
+  setShowSpeakerNotes?: (show: boolean) => void;
   onStartSlideShow: () => void;
   zoomLevel: number;
   setZoomLevel: (zoom: number) => void;
@@ -101,21 +101,16 @@ export const PowerPointStatusBar: React.FC<PowerPointStatusBarProps> = ({
         </button>
       </div>
 
-      {/* Right items: Speaker notes, Views, Zoom and Font size controls */}
+      {/* Right items: Speaker notes indicator (non-interactive), Views, Zoom and Font size controls */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Speaker Notes Toggle */}
-        <button
-          onClick={() => setShowSpeakerNotes(!showSpeakerNotes)}
-          className={`px-2 py-0.5 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
-            showSpeakerNotes
-              ? 'bg-[#D24726] text-white'
-              : 'hover:bg-slate-200 text-slate-700'
-          }`}
-          title="Sprekersnotities in- of uitschakelen"
+        {/* Speaker Notes indicator - non-interactive as requested */}
+        <span
+          className="px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 text-slate-400 select-none cursor-default"
+          title="Sprekersnotities"
         >
-          <FileText className="w-3.5 h-3.5" />
+          <FileText className="w-3.5 h-3.5 text-slate-400" />
           <span className="hidden sm:inline">Notities</span>
-        </button>
+        </span>
 
         {/* View mode icons */}
         <div className="hidden sm:flex items-center gap-1 border-l border-slate-300 pl-2">

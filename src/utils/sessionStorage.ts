@@ -1,7 +1,17 @@
 import { StudentSession } from '../types';
 
-const SESSIONS_KEY = 'kiss_presentations_student_sessions_v1';
-const ACTIVE_SESSION_ID_KEY = 'kiss_presentations_active_session_id';
+const SESSIONS_KEY = 'kiss_presentations_student_sessions_v2';
+const ACTIVE_SESSION_ID_KEY = 'kiss_presentations_active_session_id_v2';
+
+// Clean up legacy test session storage if present
+try {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.removeItem('kiss_presentations_student_sessions_v1');
+    window.localStorage.removeItem('kiss_presentations_active_session_id');
+  }
+} catch (e) {
+  // Ignore storage errors in restricted contexts
+}
 
 export function getAllSessions(): StudentSession[] {
   try {

@@ -3,7 +3,6 @@ import { PowerPointTitleBar } from './components/powerpoint/PowerPointTitleBar';
 import { PowerPointRibbon } from './components/powerpoint/PowerPointRibbon';
 import { PowerPointSlideThumbnails } from './components/powerpoint/PowerPointSlideThumbnails';
 import { PowerPointStatusBar } from './components/powerpoint/PowerPointStatusBar';
-import { SpeakerNotesDrawer } from './components/powerpoint/SpeakerNotesDrawer';
 import { BackstageModal } from './components/powerpoint/BackstageModal';
 import { SlideShowModal } from './components/powerpoint/SlideShowModal';
 import { ReadingRuler } from './components/powerpoint/ReadingRuler';
@@ -13,14 +12,13 @@ import { TeacherDashboardModal } from './components/TeacherDashboardModal';
 import { IntroModule } from './components/modules/IntroModule';
 import { KissPrincipleModule } from './components/modules/KissPrincipleModule';
 import { SpotErrorModule } from './components/modules/SpotErrorModule';
-import { MakeoverStudioModule } from './components/modules/MakeoverStudioModule';
 import { QuizModule } from './components/modules/QuizModule';
 import { CertificateModule } from './components/modules/CertificateModule';
 
 import { StudentSession, AccessibilitySettings } from './types';
 import { getOrCreateDefaultSession, saveSession } from './utils/sessionStorage';
 import { CURRICULUM_GOALS } from './data/curriculumData';
-import { BookOpen, UserPlus, Info, Type, Sliders, Eye } from 'lucide-react';
+import { BookOpen, UserPlus, Info, Type, Sliders, Eye, Lock, ArrowRight } from 'lucide-react';
 
 const DEFAULT_ACCESSIBILITY: AccessibilitySettings = {
   dyslexiaFont: false,
@@ -36,6 +34,9 @@ export default function App() {
   const [activeRibbonTab, setActiveRibbonTab] = useState<'home' | 'insert' | 'design' | 'slideshow' | 'accessibility'>('home');
   const [accessibility, setAccessibility] = useState<AccessibilitySettings>(DEFAULT_ACCESSIBILITY);
   
+  // Ref to scroll container so user always starts at top on module switch
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
   // UI states
   const [showSpeakerNotes, setShowSpeakerNotes] = useState<boolean>(true);
   const [thumbnailsCollapsed, setThumbnailsCollapsed] = useState<boolean>(false);
@@ -45,6 +46,15 @@ export default function App() {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState<boolean>(false);
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState<boolean>(false);
   const [showCurriculumModal, setShowCurriculumModal] = useState<boolean>(false);
+
+  // Always scroll to top when changing modules
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      scrollContainerRef.current.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activeModule]);
 
   // Load session & accessibility settings automatically
   useEffect(() => {
@@ -97,8 +107,8 @@ export default function App() {
     setActiveModule('intro');
   };
 
-  // Determine slide number (1 to 6)
-  const moduleOrder = ['intro', 'kiss', 'spot', 'makeover', 'quiz', 'diploma'];
+  // Determine slide number (1 to 5)
+  const moduleOrder = ['intro', 'kiss', 'spot', 'quiz', 'diploma'];
   const currentSlideNum = Math.max(1, moduleOrder.indexOf(activeModule) + 1);
 
   // Dynamic root accessibility classes
@@ -131,15 +141,6 @@ export default function App() {
             session={session}
             onUpdateSession={handleUpdateSession}
             onCompleteModule={handleCompleteModule}
-            onNext={() => setActiveModule('makeover')}
-          />
-        );
-      case 'makeover':
-        return (
-          <MakeoverStudioModule
-            session={session}
-            onUpdateSession={handleUpdateSession}
-            onCompleteModule={handleCompleteModule}
             onNext={() => setActiveModule('quiz')}
           />
         );
@@ -153,6 +154,28 @@ export default function App() {
           />
         );
       case 'diploma':
+        const quizCount = Object.keys(session?.quizAnswers || {}).length;
+        const isQuizFinished = session?.quizCompleted || quizCount >= 8;
+        if (!isQuizFinished) {
+          return (
+            <div className="max-w-md mx-auto my-12 p-8 bg-white rounded-3xl border border-slate-200 text-center space-y-4 shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-amber-100 text-orange-600 flex items-center justify-center mx-auto">
+                <Lock className="w-8 h-8" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Nog even geduld!</h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Je kunt jouw score en feedback pas bekijken wanneer je alle 8 vragen van de KISS-Quiz hebt beantwoord. ({quizCount}/8 ingevuld)
+              </p>
+              <button
+                onClick={() => setActiveModule('quiz')}
+                className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl text-sm shadow-xs transition-colors inline-flex items-center gap-2"
+              >
+                <span>Ga naar de Quiz</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          );
+        }
         return (
           <CertificateModule
             session={session}
@@ -207,7 +230,7 @@ export default function App() {
         {/* Center: Slide Presentation Canvas */}
         <div className={`flex-1 flex flex-col overflow-hidden ${tintClass}`}>
           {/* Work area around slide */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex items-start justify-center">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex items-start justify-center">
             <div
               className="w-full max-w-5xl bg-white rounded-xl shadow-lg border border-slate-300 overflow-hidden transition-transform origin-top my-auto"
               style={{ transform: `scale(${zoomLevel / 100})` }}
@@ -246,13 +269,6 @@ export default function App() {
               </div>
             </div>
           </div>
-
-          {/* Collapsible Speaker Notes Drawer beneath the slide */}
-          <SpeakerNotesDrawer
-            activeModule={activeModule}
-            isOpen={showSpeakerNotes}
-            onToggle={() => setShowSpeakerNotes(!showSpeakerNotes)}
-          />
         </div>
       </div>
 
@@ -263,8 +279,6 @@ export default function App() {
         session={session}
         accessibility={accessibility}
         onChangeAccessibility={handleChangeAccessibility}
-        showSpeakerNotes={showSpeakerNotes}
-        setShowSpeakerNotes={setShowSpeakerNotes}
         onStartSlideShow={() => setIsSlideShowOpen(true)}
         zoomLevel={zoomLevel}
         setZoomLevel={setZoomLevel}

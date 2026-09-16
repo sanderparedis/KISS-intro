@@ -68,8 +68,9 @@ export const KissPrincipleModule: React.FC<KissPrincipleModuleProps> = ({
     setRevealedS1(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Interactive 6x6 tester - starts with a faulty slide that students must improve
-  const [testText, setTestText] = useState(FAULTY_6X6_SAMPLE);
+  // 6x6 demonstration: switch between faulty sample and improved solution
+  const [showImproved6x6, setShowImproved6x6] = useState(false);
+  const current6x6Text = showImproved6x6 ? GOOD_6X6_SAMPLE : FAULTY_6X6_SAMPLE;
 
   // Interactive contrast preview
   const [selectedBg, setSelectedBg] = useState<'light' | 'dark' | 'yellow' | 'navy'>('navy');
@@ -78,7 +79,7 @@ export const KissPrincipleModule: React.FC<KissPrincipleModuleProps> = ({
   // Interactive aspect ratio demo
   const [isStretched, setIsStretched] = useState(false);
 
-  const lines = testText.split('\n').filter((l) => l.trim().length > 0);
+  const lines = current6x6Text.split('\n').filter((l) => l.trim().length > 0);
   const lineCount = lines.length;
   const maxWordsInLine = Math.max(
     ...lines.map((l) => l.trim().split(/\s+/).filter(Boolean).length),
@@ -375,16 +376,16 @@ export const KissPrincipleModule: React.FC<KissPrincipleModuleProps> = ({
             </div>
           </div>
 
-          {/* Interactive 6x6 Checker - Improvement Challenge */}
+          {/* 6x6 Rule Demonstration - Transform via Voorbeeldoplossing */}
           <div className="bg-slate-50 p-5 sm:p-6 rounded-2xl border border-slate-200 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
               <div>
                 <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                   <ListOrdered className="w-4 h-4 text-orange-600" />
-                  Oefening: Verbeter deze dia zelf naar de 6x6-regel!
+                  De 6x6-regel in actie • Van overvolle dia naar heldere kernwoorden
                 </h4>
                 <p className="text-xs text-slate-600 mt-1">
-                  Deze dia staat vol lange zinnen en telt 7 regels. Schrap overbodige woorden tot er <strong>maximaal 6 regels</strong> met <strong>maximaal 6 kernwoorden per regel</strong> overblijven.
+                  Hieronder zie je een typische foute dia met lange volzinnen. Verbeter de dia direct met de knop <strong>Voorbeeldoplossing</strong>!
                 </p>
               </div>
 
@@ -408,57 +409,99 @@ export const KissPrincipleModule: React.FC<KissPrincipleModuleProps> = ({
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span className="text-slate-500 font-medium">
-                Pas de tekst in het vak hieronder aan:
+            {/* Action Bar with Transform Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <span className="text-xs text-slate-600 font-medium">
+                Status: <strong className={showImproved6x6 ? 'text-emerald-700' : 'text-rose-700'}>
+                  {showImproved6x6 ? '✅ Verbeterde dia (Voldoet aan 6x6)' : '❌ Fout voorbeeld (Overvolle dia met 7 lange zinnen)'}
+                </strong>
               </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTestText(FAULTY_6X6_SAMPLE)}
-                  className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                  title="Herstel de foute tekst om opnieuw te oefenen"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  Herstel foute dia
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTestText(GOOD_6X6_SAMPLE)}
-                  className="px-2.5 py-1 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                  title="Bekijk een goedgekeurd voorbeeld met steekwoorden"
-                >
-                  <Lightbulb className="w-3.5 h-3.5 text-orange-600" />
-                  Voorbeeldoplossing
-                </button>
+
+              <button
+                type="button"
+                onClick={() => setShowImproved6x6(!showImproved6x6)}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs ${
+                  showImproved6x6
+                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+                    : 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-200'
+                }`}
+              >
+                {showImproved6x6 ? (
+                  <>
+                    <RotateCcw className="w-4 h-4 text-slate-500" />
+                    <span>Toon opnieuw het foute voorbeeld</span>
+                  </>
+                ) : (
+                  <>
+                    <Lightbulb className="w-4 h-4 text-white animate-pulse" />
+                    <span>Verbeter m.b.v. Voorbeeldoplossing</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Slide Box Visualizer */}
+            <div
+              className={`p-5 sm:p-6 rounded-2xl border-2 transition-all shadow-sm ${
+                showImproved6x6
+                  ? 'bg-white border-emerald-300 ring-2 ring-emerald-100'
+                  : 'bg-rose-50/40 border-rose-300 ring-2 ring-rose-100'
+              }`}
+            >
+              <div className="flex items-center justify-between border-b pb-2.5 mb-3 border-slate-200 text-xs">
+                <span className="font-bold text-slate-800 uppercase tracking-wider">
+                  Dia-voorbeeld: Parijs
+                </span>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${showImproved6x6 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                  {showImproved6x6 ? 'KISS-stijl' : 'Slechte stijl'}
+                </span>
+              </div>
+
+              <div className="space-y-2 font-sans">
+                {lines.map((line, idx) => {
+                  const words = line.trim().split(/\s+/).filter(Boolean).length;
+                  return (
+                    <div
+                      key={idx}
+                      className={`p-2 rounded-lg flex items-start justify-between gap-3 text-xs sm:text-sm transition-all ${
+                        showImproved6x6
+                          ? 'bg-emerald-50/50 text-slate-900 font-semibold'
+                          : words > 6
+                          ? 'bg-rose-100/60 text-rose-950 font-medium'
+                          : 'bg-slate-100 text-slate-800'
+                      }`}
+                    >
+                      <span className="leading-relaxed">{line}</span>
+                      <span
+                        className={`text-[10px] font-mono font-bold shrink-0 px-1.5 py-0.5 rounded ${
+                          words <= 6 ? 'bg-emerald-200/80 text-emerald-900' : 'bg-rose-200 text-rose-900'
+                        }`}
+                      >
+                        {words} {words === 1 ? 'woord' : 'woorden'}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <textarea
-              value={testText}
-              onChange={(e) => setTestText(e.target.value)}
-              rows={7}
-              className="w-full p-4 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-mono text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all leading-relaxed shadow-inner"
-              placeholder="Typ of plak hier je dia-tekst met bullet points..."
-            />
-
-            {/* Dynamic Real-Time Feedback */}
+            {/* Explanation Card */}
             <div
               className={`p-4 rounded-xl flex items-start gap-3 text-xs leading-relaxed transition-all ${
-                passes6x6
-                  ? 'bg-emerald-50 text-emerald-950 border-2 border-emerald-300 shadow-sm'
-                  : 'bg-rose-50 text-rose-950 border-2 border-rose-300 shadow-sm'
+                showImproved6x6
+                  ? 'bg-emerald-50 text-emerald-950 border border-emerald-300 shadow-xs'
+                  : 'bg-amber-50 text-amber-950 border border-amber-300 shadow-xs'
               }`}
             >
-              {passes6x6 ? (
+              {showImproved6x6 ? (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block font-bold text-sm text-emerald-900 mb-0.5">
-                      🎉 Fantastisch verbeterd! Deze dia voldoet perfect aan de 6x6-regel!
+                      🎉 Zo ziet een perfecte KISS-dia eruit!
                     </strong>
                     <span>
-                      Je hebt de tekst succesvol omgevormd tot krachtige steekwoorden. Je publiek kan dit in 3 seconden scannen terwijl jij het boeiende verhaal vertelt!
+                      Met maximaal 6 regels en korte steekwoorden (maximaal 4 woorden per regel) kan het publiek de dia in 2 seconden scannen. Ze blijven luisteren naar jouw mondelinge uitleg!
                     </span>
                   </div>
                 </>
@@ -466,21 +509,12 @@ export const KissPrincipleModule: React.FC<KissPrincipleModuleProps> = ({
                 <>
                   <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block font-bold text-sm text-rose-900 mb-0.5">
-                      Nog niet goedgekeurd: deze dia is te vol voor de klas!
+                    <strong className="block font-bold text-sm text-amber-900 mb-0.5">
+                      Waarom is het originele voorbeeld fout?
                     </strong>
-                    <ul className="list-disc pl-4 space-y-1 mt-1 text-rose-800">
-                      {lineCount > 6 && (
-                        <li>
-                          <strong>Te veel regels:</strong> Er staan momenteel <strong>{lineCount} regels</strong> (maximaal 6 toegestaan). Verwijder de minst belangrijke punten of splits ze naar een volgende dia.
-                        </li>
-                      )}
-                      {maxWordsInLine > 6 && (
-                        <li>
-                          <strong>Te veel woorden:</strong> De langste regel telt momenteel <strong>{maxWordsInLine} woorden</strong> (maximaal 6 toegestaan). Schrap lidwoorden ("de", "het", "een") en werkwoorden om enkel kernbegrippen over te houden!
-                        </li>
-                      )}
-                    </ul>
+                    <p className="text-amber-800">
+                      Deze dia telt 7 lange volzinnen (tot 14 woorden per regel). Het publiek stopt met luisteren naar de spreker en raakt afgeleid door te moeten lezen. Klik hierboven op <strong>"Verbeter m.b.v. Voorbeeldoplossing"</strong> om te zien hoe je dit oplost!
+                    </p>
                   </div>
                 </>
               )}

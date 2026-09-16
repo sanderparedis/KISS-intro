@@ -7,7 +7,8 @@ import {
   Lightbulb, 
   RotateCcw,
   Award,
-  BookOpen
+  BookOpen,
+  Lock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { StudentSession } from '../../types';
@@ -93,20 +94,22 @@ export const QuizModule: React.FC<QuizModuleProps> = ({
     }
   };
 
+  const answeredCount = Object.keys(currentAnswers).length;
+  const currentScore = session?.quizScore || 0;
+  const isAllAnswered = answeredCount === totalQuestions;
+
   const handleNext = () => {
+    if (!isAllAnswered) return;
     onCompleteModule('quiz');
     onNext();
   };
-
-  const answeredCount = Object.keys(currentAnswers).length;
-  const currentScore = session?.quizScore || 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-4">
       {/* Quiz Header */}
       <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white p-6 sm:p-8 rounded-3xl shadow-sm">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-3">
-          Module 5 • Kennistest
+          Module 4 • Kennistest
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -161,10 +164,11 @@ export const QuizModule: React.FC<QuizModuleProps> = ({
           {answeredCount > 0 && (
             <button
               onClick={handleResetQuiz}
-              className="text-slate-400 hover:text-slate-700 p-1"
-              title="Quiz opnieuw proberen"
+              className="inline-flex items-center gap-1 text-slate-600 hover:text-orange-600 bg-slate-100 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 px-2.5 py-1 rounded-lg transition-all text-xs font-medium cursor-pointer"
+              title="Wis antwoorden en start de quiz opnieuw"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3 h-3" />
+              <span>Opnieuw</span>
             </button>
           )}
         </div>
@@ -306,18 +310,43 @@ export const QuizModule: React.FC<QuizModuleProps> = ({
         </div>
       </div>
 
-      {/* Action to Diploma */}
+      {/* Action to Feedback */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-white rounded-2xl border border-slate-200">
         <div className="text-xs sm:text-sm text-slate-600">
-          Klaar met de quiz? Bekijk je resultaten en ontvang je <strong>KISS Presentator Diploma</strong>!
+          {isAllAnswered ? (
+            <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              Alle 8 vragen zijn beantwoord! Je kunt nu jouw score en feedback bekijken.
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-amber-800 font-medium">
+              <Lock className="w-4 h-4 text-amber-600 shrink-0" />
+              Beantwoord eerst alle 8 vragen om jouw score en feedback te ontgrendelen ({answeredCount}/{totalQuestions} beantwoord).
+            </span>
+          )}
         </div>
         <button
+          disabled={!isAllAnswered}
           onClick={handleNext}
           id="btn-next-to-diploma"
-          className="w-full sm:w-auto px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-xl text-sm shadow-xs transition-colors flex items-center justify-center gap-2"
+          className={`w-full sm:w-auto px-6 py-3 font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${
+            isAllAnswered
+              ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-xs cursor-pointer'
+              : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-80'
+          }`}
+          title={isAllAnswered ? 'Ga naar jouw resultaten' : 'Beantwoord eerst alle 8 vragen'}
         >
-          <span>Naar Module 6: Mijn Diploma & Rapport</span>
-          <ArrowRight className="w-4 h-4" />
+          {isAllAnswered ? (
+            <>
+              <span>Naar Module 5: Jouw Score & Feedback</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4" />
+              <span>Nog {totalQuestions - answeredCount} {totalQuestions - answeredCount === 1 ? 'vraag' : 'vragen'} te beantwoorden</span>
+            </>
+          )}
         </button>
       </div>
     </div>

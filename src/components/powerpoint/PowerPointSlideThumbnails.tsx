@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, ChevronLeft, ChevronRight, Monitor, Sparkles, AlertTriangle, Wand2, HelpCircle, Award } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Monitor, Sparkles, AlertTriangle, HelpCircle, Award, Lock } from 'lucide-react';
 import { StudentSession } from '../../types';
 
 interface SlideThumbnail {
@@ -40,21 +40,13 @@ const SLIDE_THUMBNAILS: SlideThumbnail[] = [
     id: 'spot',
     num: 3,
     title: 'Spot de Fout!',
-    subtitle: 'Foutenspeurtocht',
+    subtitle: 'Klassikaal Gesprek',
     icon: AlertTriangle,
     bgPreview: 'bg-amber-100 text-amber-900',
   },
   {
-    id: 'makeover',
-    num: 4,
-    title: 'Makeover Studio',
-    subtitle: 'Zelf Renoveren',
-    icon: Wand2,
-    bgPreview: 'bg-slate-900 text-white',
-  },
-  {
     id: 'quiz',
-    num: 5,
+    num: 4,
     title: 'De KISS-Quiz',
     subtitle: '8 Kennistestvragen',
     icon: HelpCircle,
@@ -62,9 +54,9 @@ const SLIDE_THUMBNAILS: SlideThumbnail[] = [
   },
   {
     id: 'diploma',
-    num: 6,
-    title: 'Diploma & Rapport',
-    subtitle: 'LPD Evaluatie',
+    num: 5,
+    title: 'Score & Feedback',
+    subtitle: 'Jouw Resultaten',
     icon: Award,
     bgPreview: 'bg-amber-400 text-slate-900',
   },
@@ -100,13 +92,20 @@ export const PowerPointSlideThumbnails: React.FC<PowerPointSlideThumbnailsProps>
         {SLIDE_THUMBNAILS.map((slide) => {
           const isActive = activeModule === slide.id;
           const isCompleted = session?.completedModules.includes(slide.id);
+          const quizAnswersCount = Object.keys(session?.quizAnswers || {}).length;
+          const isLocked = slide.id === 'diploma' && !session?.quizCompleted && quizAnswersCount < 8;
           const Icon = slide.icon;
 
           return (
             <div
               key={slide.id}
-              onClick={() => setActiveModule(slide.id)}
-              className="group flex items-start gap-1.5 cursor-pointer"
+              onClick={() => {
+                if (!isLocked) {
+                  setActiveModule(slide.id);
+                }
+              }}
+              title={isLocked ? 'Beantwoord eerst alle 8 vragen van de quiz om te ontgrendelen' : undefined}
+              className={`group flex items-start gap-1.5 ${isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
             >
               {/* Slide Number */}
               <span
@@ -120,20 +119,26 @@ export const PowerPointSlideThumbnails: React.FC<PowerPointSlideThumbnailsProps>
               {/* Slide Thumbnail Box (16:9 ratio) */}
               <div
                 className={`flex-1 rounded border transition-all relative overflow-hidden ${
-                  isActive
+                  isLocked
+                    ? 'border-dashed border-slate-300 bg-slate-100'
+                    : isActive
                     ? 'border-[#D24726] ring-2 ring-[#D24726]/30 shadow-sm'
                     : 'border-slate-300 hover:border-slate-400 bg-white'
                 }`}
               >
                 {/* Visual miniature */}
                 <div
-                  className={`aspect-16/10 p-2 flex flex-col justify-between ${slide.bgPreview} ${
+                  className={`aspect-16/10 p-2 flex flex-col justify-between ${isLocked ? 'bg-slate-200 text-slate-500' : slide.bgPreview} ${
                     collapsed ? 'h-8' : 'h-18 sm:h-22'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <Icon className="w-3.5 h-3.5 opacity-80" />
-                    {isCompleted && (
+                    {isLocked ? (
+                      <Lock className="w-3.5 h-3.5 text-slate-500" />
+                    ) : (
+                      <Icon className="w-3.5 h-3.5 opacity-80" />
+                    )}
+                    {isCompleted && !isLocked && (
                       <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-bold">
                         ✓
                       </span>
@@ -146,7 +151,7 @@ export const PowerPointSlideThumbnails: React.FC<PowerPointSlideThumbnailsProps>
                         {slide.title}
                       </span>
                       <span className="block text-[8px] opacity-75 truncate">
-                        {slide.subtitle}
+                        {isLocked ? '🔒 Vergrendeld' : slide.subtitle}
                       </span>
                     </div>
                   )}
