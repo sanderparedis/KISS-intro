@@ -1,0 +1,6 @@
+{
+  "name": "KISS Presentaties - Introductieles ICT",
+  "description": "Interactieve introductieles voor het 1ste middelbaar over doeltreffende presentaties volgens het KISS-principe en het ICT-leerplan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
